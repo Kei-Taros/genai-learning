@@ -9,3 +9,5 @@
 そのままだが、果物を選択するとその果物の色を回答してくれるだけの AI である。
 
 学習データとして与える座標(embedding) を 2 次元として、その距離を測定して、色を判定している。
+
+<img width="679" height="893" alt="スクリーンショット 2025-12-11 212648" src="https://github.com/user-attachments/assets/ace804b9-62b7-429e-8881-50d726bde5b6" />
