@@ -1,17 +1,11 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import EmbeddingChart from "./components/EmbeddingChart";
 import { colorEmbeddings } from "./assets/embedding";
 import { colorLabelMap, fruitLabelMap } from "./assets/labelMap";
 
 type Vec2 = [number, number];
 
-// 果物と「2次元エンベディング」
-const fruitEmbeddings: Record<string, Vec2> = {
-  apple: [0.9, 0.8],
-  strawberry: [0.95, 0.95],
-  banana: [0.1, 0.9],
-  kiwi: [-0.2, 0.8],
-};
+const rand = (): number => Math.random() * 1.98 - 0.99;
 
 // ユークリッド距離
 const distance = (a: Vec2, b: Vec2): number => {
@@ -21,7 +15,10 @@ const distance = (a: Vec2, b: Vec2): number => {
 };
 
 // 「AI」が果物の色を推論する関数
-const predictColor = (fruit: string): string | null => {
+const predictColor = (
+  fruit: string,
+  fruitEmbeddings: Record<string, Vec2>
+): string | null => {
   const fruitVec = fruitEmbeddings[fruit];
   if (!fruitVec) return null;
 
@@ -39,12 +36,29 @@ const predictColor = (fruit: string): string | null => {
   return bestColor;
 };
 
-const App: React.FC = () => {
+const App = () => {
+  const [fruitEmbeddings, setFruitEmbeddings] = useState<Record<string, Vec2>>({
+    apple: [0, 0],
+    strawberry: [0, 0],
+    banana: [0, 0],
+    kiwi: [0, 0],
+  });
+
+  useEffect(() => {
+    const newEmbeddings: Record<string, Vec2> = {
+      apple: [rand(), rand()],
+      strawberry: [rand(), rand()],
+      banana: [rand(), rand()],
+      kiwi: [rand(), rand()],
+    };
+    setFruitEmbeddings(newEmbeddings);
+  }, []);
+
   const [selectedFruit, setSelectedFruit] = useState<string>("apple");
   const [answer, setAnswer] = useState<string | null>(null);
 
   const handlePredict = () => {
-    const result = predictColor(selectedFruit);
+    const result = predictColor(selectedFruit, fruitEmbeddings);
     if (!result) return;
 
     const japaneseColor = colorLabelMap[result] ?? result;
