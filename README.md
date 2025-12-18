@@ -10,4 +10,5 @@
 
 学習データとして与える座標(embedding) を 2 次元として、その距離を測定して、色を判定している。
 
-<img width="679" height="893" alt="スクリーンショット 2025-12-11 212648" src="https://github.com/user-attachments/assets/ace804b9-62b7-429e-8881-50d726bde5b6" />
+<img width="673" height="902" alt="スクリーンショット 2025-12-19 024251" src="https://github.com/user-attachments/assets/a7858d14-e825-4443-85da-465e3cd20109" />
+
