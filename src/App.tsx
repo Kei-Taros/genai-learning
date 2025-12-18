@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import EmbeddingChart from "./components/EmbeddingChart";
-import { colorEmbeddings } from "./assets/embedding";
+import { colorEmbeddings, fruitTargetColor } from "./assets/embedding";
 import { colorLabelMap, fruitLabelMap } from "./assets/labelMap";
 
 type Vec2 = [number, number];
@@ -36,6 +36,42 @@ const predictColor = (
   return bestColor;
 };
 
+const moveTowards = (current: number, target: number, step = 0.1): number => {
+  const diff = target - current;
+  if (Math.abs(diff) <= step) return target;
+  return current + Math.sign(diff) * step;
+};
+
+const trainOnce = (
+  embeddings: Record<string, Vec2>,
+  step = 0.1
+): Record<string, Vec2> => {
+  const next: Record<string, Vec2> = {};
+
+  for (const [fruitKey, vec] of Object.entries(embeddings)) {
+    const targetColor = fruitTargetColor[fruitKey];
+    if (!targetColor) {
+      next[fruitKey] = vec;
+      continue;
+    }
+
+    const target = colorEmbeddings[targetColor];
+    const [x, y] = vec;
+    const [tx, ty] = target;
+
+    next[fruitKey] = [moveTowards(x, tx, step), moveTowards(y, ty, step)];
+  }
+
+  return next;
+};
+
+const createRandomFruitEmbeddings = (): Record<string, Vec2> => ({
+  apple: [rand(), rand()],
+  strawberry: [rand(), rand()],
+  banana: [rand(), rand()],
+  kiwi: [rand(), rand()],
+});
+
 const App = () => {
   const [fruitEmbeddings, setFruitEmbeddings] = useState<Record<string, Vec2>>({
     apple: [0, 0],
@@ -44,16 +80,8 @@ const App = () => {
     kiwi: [0, 0],
   });
 
-  useEffect(() => {
-    const newEmbeddings: Record<string, Vec2> = {
-      apple: [rand(), rand()],
-      strawberry: [rand(), rand()],
-      banana: [rand(), rand()],
-      kiwi: [rand(), rand()],
-    };
-    setFruitEmbeddings(newEmbeddings);
-  }, []);
-
+  const [isTraining, setIsTraining] = useState(false);
+  const trainTimerRef = useRef<number | null>(null);
   const [selectedFruit, setSelectedFruit] = useState<string>("apple");
   const [answer, setAnswer] = useState<string | null>(null);
 
@@ -64,6 +92,38 @@ const App = () => {
     const japaneseColor = colorLabelMap[result] ?? result;
     setAnswer(japaneseColor);
   };
+
+  const handleTrain = () => {
+    if (isTraining) return;
+
+    setIsTraining(true);
+
+    let count = 0;
+
+    trainTimerRef.current = window.setInterval(() => {
+      setFruitEmbeddings((prev) => trainOnce(prev, 0.1));
+
+      count += 1;
+      if (count >= 3) {
+        if (trainTimerRef.current !== null) {
+          window.clearInterval(trainTimerRef.current);
+          trainTimerRef.current = null;
+        }
+        setIsTraining(false);
+      }
+    }, 200); // 実行間隔を設定
+  };
+
+  useEffect(() => {
+    setFruitEmbeddings(createRandomFruitEmbeddings());
+
+    return () => {
+      if (trainTimerRef.current !== null) {
+        window.clearInterval(trainTimerRef.current);
+        trainTimerRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div style={{ padding: "24px", fontFamily: "sans-serif" }}>
@@ -90,6 +150,16 @@ const App = () => {
       >
         AIに聞く
       </button>
+
+      <div>
+        <button
+          onClick={handleTrain}
+          disabled={isTraining}
+          style={{ marginLeft: "12px", padding: "4px 12px" }}
+        >
+          {isTraining ? "学習中..." : "学習する"}
+        </button>
+      </div>
 
       <div style={{ marginTop: "16px" }}>
         <div>

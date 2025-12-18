@@ -6,3 +6,13 @@ export const colorEmbeddings: Record<string, Vec2> = {
   yellow: [1.0, -1.0],
   green: [-1.0, 1.0],
 };
+
+type ColorKey = keyof typeof colorEmbeddings;
+
+// 果物ごとの「正解の色」
+export const fruitTargetColor: Record<string, ColorKey> = {
+  apple: "red",
+  strawberry: "red",
+  banana: "yellow",
+  kiwi: "green",
+};
