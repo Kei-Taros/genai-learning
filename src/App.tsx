@@ -114,6 +114,16 @@ const App = () => {
     }, 200); // 実行間隔を設定
   };
 
+  const handleTrainReset = () => {
+    if (trainTimerRef.current !== null) {
+      window.clearInterval(trainTimerRef.current);
+      trainTimerRef.current = null;
+    }
+
+    setIsTraining(false);
+    setFruitEmbeddings(createRandomFruitEmbeddings());
+  };
+
   useEffect(() => {
     setFruitEmbeddings(createRandomFruitEmbeddings());
 
@@ -158,6 +168,14 @@ const App = () => {
           style={{ marginLeft: "12px", padding: "4px 12px" }}
         >
           {isTraining ? "学習中..." : "学習する"}
+        </button>
+
+        <button
+          onClick={handleTrainReset}
+          style={{ marginLeft: "12px", padding: "4px 12px" }}
+          disabled={isTraining}
+        >
+          学習をリセット
         </button>
       </div>
 
