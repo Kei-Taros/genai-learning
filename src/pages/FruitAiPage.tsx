@@ -2,22 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import EmbeddingChart from "../components/EmbeddingChart";
 import { colorEmbeddings } from "../assets/embedding";
 import { colorLabelMap, fruitLabelMap } from "../assets/labelMap";
-import {
-  predictColor,
-  trainOnce,
-  createRandomFruitEmbeddings,
-  type Vec2,
-} from "../utils/logic";
+import { predictColor } from "../utils/logic";
+import { useFruitAiStore } from "../store/fruitAiStore";
 
 const FruitAiPage = () => {
-  const [fruitEmbeddings, setFruitEmbeddings] = useState<Record<string, Vec2>>({
-    apple: [0, 0],
-    strawberry: [0, 0],
-    banana: [0, 0],
-    kiwi: [0, 0],
-  });
+  const fruitEmbeddings = useFruitAiStore((s) => s.fruitEmbeddings);
+  const isTraining = useFruitAiStore((s) => s.isTraining);
+  const initRandom = useFruitAiStore((s) => s.initRandom);
+  const setIsTraining = useFruitAiStore((s) => s.setIsTraining);
+  const trainStep = useFruitAiStore((s) => s.trainStep);
+  const resetTraining = useFruitAiStore((s) => s.resetTraining);
 
-  const [isTraining, setIsTraining] = useState(false);
   const trainTimerRef = useRef<number | null>(null);
   const [selectedFruit, setSelectedFruit] = useState<string>("apple");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -38,7 +33,7 @@ const FruitAiPage = () => {
     let count = 0;
 
     trainTimerRef.current = window.setInterval(() => {
-      setFruitEmbeddings((prev) => trainOnce(prev, 0.1));
+      trainStep(0.1);
 
       count += 1;
       if (count >= 3) {
@@ -57,12 +52,11 @@ const FruitAiPage = () => {
       trainTimerRef.current = null;
     }
 
-    setIsTraining(false);
-    setFruitEmbeddings(createRandomFruitEmbeddings());
+    resetTraining();
   };
 
   useEffect(() => {
-    setFruitEmbeddings(createRandomFruitEmbeddings());
+    initRandom();
 
     return () => {
       if (trainTimerRef.current !== null) {
@@ -70,7 +64,7 @@ const FruitAiPage = () => {
         trainTimerRef.current = null;
       }
     };
-  }, []);
+  }, [initRandom]);
 
   return (
     <div style={{ padding: "24px", fontFamily: "sans-serif" }}>
