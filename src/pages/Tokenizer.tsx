@@ -4,8 +4,27 @@ import { DEFAULT_DICT } from "../assets/tokenizerDict";
 
 export default function Tokenizer() {
   const [input, setInput] = useState("りんごの色は何色ですか？");
+  const [dictInput, setDictInput] = useState("");
 
-  const tokens = useMemo(() => miniTokenize(input), [input]);
+  const BASE_DICT = ["、", ","];
+  const dict = useMemo(() => {
+    const trimmed = dictInput.trim();
+    if (!trimmed) {
+      return Array.from(new Set([...DEFAULT_DICT, ...BASE_DICT]));
+    }
+
+    const items = trimmed
+      .split(/[、,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const mergedDict = [...items, ...BASE_DICT];
+
+    const unique = Array.from(new Set(mergedDict));
+    return unique.length ? unique : [...DEFAULT_DICT, ...BASE_DICT];
+  }, [dictInput]);
+
+  const tokens = useMemo(() => miniTokenize(input, dict), [input, dict]);
 
   return (
     <div style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 900 }}>
@@ -17,6 +36,16 @@ export default function Tokenizer() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            style={{ width: "100%" }}
+          />
+        </label>
+
+        <label>
+          辞書登録（[,][、] 区切り）：
+          <input
+            value={dictInput}
+            onChange={(e) => setDictInput(e.target.value)}
+            placeholder="例: りんご,ごりら,らっぱ"
             style={{ width: "100%" }}
           />
         </label>
