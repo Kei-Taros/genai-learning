@@ -13,6 +13,9 @@ const HomePage = () => {
             文字を単語区切りにする 「ミニトークナイザ」
           </Link>
         </li>
+        <li>
+          <Link to="/tokenizer-bpe">BEP版 「ミニトークナイザ」</Link>
+        </li>
       </ul>
     </div>
   );
